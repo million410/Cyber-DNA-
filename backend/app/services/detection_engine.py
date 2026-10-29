@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Iterable
 
 from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
 from app.db.models import Alert, DetectionRule, Event
 
@@ -64,11 +65,37 @@ STATIC_EVENT_RULES = {
 
 
 def ensure_detection_rules(db: Session) -> None:
-    """Insert missing rule definitions without overwriting user enable/disable choices."""
+    """Insert missing rules safely, including concurrent and tenant-scoped requests.
+
+    DetectionRule.id is a global primary key. A tenant-scoped session cannot see
+    another tenant's rule with the same base ID, so tenant-specific missing rules
+    use a namespaced ID rather than colliding with another tenant's primary key.
+    """
+    tenant_id = db.info.get("organization_id")
     for definition in RULE_DEFINITIONS:
-        rule = db.get(DetectionRule, definition["id"])
-        if rule is None:
-            db.add(DetectionRule(**definition, enabled=True, alert_count=0))
+        rule_id = definition["id"]
+        rule = db.get(DetectionRule, rule_id)
+
+        if rule is None and tenant_id is not None:
+            rule_id = f"ORG-{tenant_id}-{definition['id']}"
+            rule = db.get(DetectionRule, rule_id)
+
+        if rule is not None:
+            continue
+
+        values = {**definition, "id": rule_id, "enabled": True, "alert_count": 0}
+        if tenant_id is not None:
+            values["organization_id"] = tenant_id
+
+        # Another request may seed the same rule after the existence check.
+        # A savepoint keeps that race from aborting the caller's whole transaction.
+        try:
+            with db.begin_nested():
+                db.add(DetectionRule(**values))
+                db.flush()
+        except IntegrityError:
+            if db.get(DetectionRule, rule_id) is None:
+                raise
     db.flush()
 
 
@@ -82,6 +109,10 @@ def _as_utc(value: datetime | None) -> datetime:
 
 def _enabled(db: Session, rule_id: str) -> DetectionRule | None:
     rule = db.get(DetectionRule, rule_id)
+    if rule is None:
+        tenant_id = db.info.get("organization_id")
+        if tenant_id is not None:
+            rule = db.get(DetectionRule, f"ORG-{tenant_id}-{rule_id}")
     return rule if rule is not None and rule.enabled else None
 
 
