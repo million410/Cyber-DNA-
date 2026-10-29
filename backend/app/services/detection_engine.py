@@ -7,6 +7,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Iterable
 
 from sqlalchemy.orm import Session
+from sqlalchemy.dialects.postgresql import insert as pg_insert
 
 from app.db.models import Alert, DetectionRule, Event
 
@@ -64,11 +65,16 @@ STATIC_EVENT_RULES = {
 
 
 def ensure_detection_rules(db: Session) -> None:
-    """Insert missing rule definitions without overwriting user enable/disable choices."""
+    """Insert starter rules safely, including when concurrent requests initialize them."""
+    # A read-then-insert can race when ingestion and status requests initialize
+    # rules at the same time. PostgreSQL must resolve that race at the primary key.
     for definition in RULE_DEFINITIONS:
-        rule = db.get(DetectionRule, definition["id"])
-        if rule is None:
-            db.add(DetectionRule(**definition, enabled=True, alert_count=0))
+        statement = pg_insert(DetectionRule).values(
+            **definition,
+            enabled=True,
+            alert_count=0,
+        ).on_conflict_do_nothing(index_elements=[DetectionRule.id])
+        db.execute(statement)
     db.flush()
 
 
