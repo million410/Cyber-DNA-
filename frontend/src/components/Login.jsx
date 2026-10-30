@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Eye, EyeOff, ArrowRight, Zap, ShieldCheck, Headphones, Sun, Moon, ArrowLeft } from 'lucide-react';
 import { Brand, BrandMark } from './Brand';
+import CompanyRegistration from './CompanyRegistration';
 
 const REMEMBER = 'cyberdna-remember';
 
@@ -32,6 +33,7 @@ export function Splash({ onDone, reduced }) {
 export default function Login({ onLogin, theme, toggleTheme, notice }) {
   const saved = (() => { try { return localStorage.getItem(REMEMBER) || ''; } catch { return ''; } })();
   const [mode, setMode] = useState('login'); // login | forgot
+  const [showRegistration, setShowRegistration] = useState(false);
   const [show, setShow] = useState(false);
   const [email, setEmail] = useState(saved);
   const [pass, setPass] = useState('');
@@ -41,6 +43,19 @@ export default function Login({ onLogin, theme, toggleTheme, notice }) {
   const [busy, setBusy] = useState(false);
 
   const reset = (m) => { setMode(m); setError(''); setInfo(''); setPass(''); };
+
+  useEffect(() => {
+    const token = new URLSearchParams(window.location.search).get('verify');
+    if (!token) return;
+    let cancelled = false;
+    fetch((import.meta.env.VITE_API_BASE_URL || '/api/v1') + '/registration/verify', { method: 'POST', headers: { 'Content-Type': 'application/json', Accept: 'application/json' }, body: JSON.stringify({ token }) })
+      .then(async (response) => { const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload.detail || 'Email verification failed.'); return payload; })
+      .then((payload) => { if (!cancelled) { setInfo(payload.message || 'Email verified. You can now log in.'); setMode('login'); window.history.replaceState({}, '', window.location.pathname); } })
+      .catch((err) => { if (!cancelled) setError(err.message); });
+    return () => { cancelled = true; };
+  }, []);
+
+  if (showRegistration) return <div className="login"><div className="login-card"><section className="login-form"><Brand label="Cyber DNA" /><CompanyRegistration onBack={() => setShowRegistration(false)} /></section></div></div>;
 
   const submit = async (e) => {
     e.preventDefault();
@@ -118,6 +133,7 @@ export default function Login({ onLogin, theme, toggleTheme, notice }) {
               {busy ? 'Signing in…' : mode === 'login' ? 'Log in' : 'Send reset link'} <ArrowRight size={16} />
             </button>
           </form>
+          {mode === 'login' && <p className="switch">New to Cyber DNA? <button type="button" onClick={() => { setError(''); setInfo(''); setShowRegistration(true); }}>Register your company</button></p>}
           {mode === 'forgot' && (
             <p className="switch"><button type="button" onClick={() => reset('login')}><ArrowLeft size={14} style={{ verticalAlign: '-2px' }} /> Back to log in</button></p>
           )}

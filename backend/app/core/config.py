@@ -21,6 +21,13 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = None
     CYBERDNA_BOOTSTRAP_SECRET: Optional[str] = None
     CYBERDNA_COOKIE_SECURE: bool = False
+    SMTP_HOST: Optional[str] = None
+    SMTP_PORT: int = 587
+    SMTP_USERNAME: Optional[str] = None
+    SMTP_PASSWORD: Optional[str] = None
+    SMTP_FROM_EMAIL: Optional[str] = None
+    SMTP_USE_TLS: bool = True
+    PUBLIC_APP_URL: Optional[str] = None
     AI_TIMEOUT_SECONDS: float = 30.0
     AI_MAX_HISTORY: int = 8
     AI_MAX_RECORDS: int = 25
