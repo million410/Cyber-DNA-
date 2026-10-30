@@ -73,11 +73,11 @@ export function parseReply(data) {
 }
 
 export async function askAssistant({ message, history = [], context, options }) {
+  const requestContext = context || {};
   const body = {
     message,
     history: history.slice(-MAX_HISTORY).map((m) => ({ role: m.role, content: String(m.content).slice(0, MAX_CONTENT) })),
-    ...(context ? { context } : {}),
-    ...(options ? { options } : {}),
+    ...(Object.keys(requestContext).length || options ? { context: { ...requestContext, ...(options ? { _response_preferences: options } : {}) } } : {}),
   };
   try {
     return parseReply(await apiPost(ASSISTANT_PATH, body, REQUEST_TIMEOUT_MS));
