@@ -72,11 +72,11 @@ export function parseReply(data) {
   return { text, sections: hasSections ? sections : null, configured: data.configured, providerStatus: data.provider_status || null, model: data.model || null };
 }
 
-export async function askAssistant({ message, history = [], context }) {
+export async function askAssistant({ message, history = [], context, options }) {
   const body = {
     message,
     history: history.slice(-MAX_HISTORY).map((m) => ({ role: m.role, content: String(m.content).slice(0, MAX_CONTENT) })),
-    ...(context ? { context } : {}),
+    ...(context ? { context } : {}),\n    ...(options ? { options } : {}),
   };
   try {
     return parseReply(await apiPost(ASSISTANT_PATH, body, REQUEST_TIMEOUT_MS));
