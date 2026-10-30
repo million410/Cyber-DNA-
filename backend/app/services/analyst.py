@@ -453,7 +453,7 @@ def ask(db, request):
         for item in (request.history or [])[-settings.AI_MAX_HISTORY:]:
             if item.get("role") in {"user", "assistant"}:
                 history.append({"role": item["role"], "content": str(item.get("content", ""))[:4000]})
-        options = request.options or {}
+        options = (request.context or {}).get('_response_preferences', {})
         response_style = options.get("responseStyle")
         audience = options.get("audience")
         style_guidance = {
