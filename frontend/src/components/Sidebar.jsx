@@ -1,5 +1,5 @@
 import React from 'react';
-import { LayoutDashboard, Bell, BriefcaseBusiness, Users, Monitor, ShieldCheck, BrainCircuit, Network, Settings2, Radio, Database, CloudCog, X } from 'lucide-react';
+import { LayoutDashboard, Bell, BriefcaseBusiness, Users, Monitor, ShieldCheck, BrainCircuit, Network, Settings2, Radio, Database, CloudCog, X, Building2 } from 'lucide-react';
 import { Brand } from './Brand';
 
 export const NAV = [
@@ -13,7 +13,7 @@ const StatusRow = ({ icon: Icon, name, state }) => (
   <div className="side-status"><Icon size={15} aria-hidden="true" /><span>{name}</span><span className="state"><span className={`dot ${STATES[state][0]}`} />{STATES[state][1]}</span></div>
 );
 
-export default function Sidebar({ page, go, open, close, openSettings, alertCount, status }) {
+export default function Sidebar({ page, go, open, close, openSettings, alertCount, status, isPlatformAdmin = false }) {\n  const groups = isPlatformAdmin ? [...NAV, { group: 'Administration', items: [['Platform Admin', Building2]] }] : NAV;
   return (
     <aside className={`sidebar ${open ? 'open' : ''}`} id="sidebar" aria-label="Primary">
       <div className="brand-row">
@@ -22,7 +22,7 @@ export default function Sidebar({ page, go, open, close, openSettings, alertCoun
       </div>
       
       <nav aria-label="Main navigation">
-        {NAV.map((g) => (
+        {groups.map((g) => (
           <div className="nav-group" key={g.group}>
             <div className="nav-label">{g.group}</div>
             {g.items.map(([name, Icon]) => (
