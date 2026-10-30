@@ -1,4 +1,4 @@
-// Advanced AI Analyst behavior. fetch is stubbed with the PROPOSED /assistant/chat contract; this proves frontend behavior only.
+// Advanced AI Analyst behavior. fetch is stubbed with the PROPOSED /analyst/ask contract; this proves frontend behavior only.
 import React from 'react';
 import { render, screen, cleanup, waitFor, within, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
