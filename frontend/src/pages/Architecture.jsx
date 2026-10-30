@@ -9,7 +9,7 @@ const SERVICE_DEFS = [
   { key: 'collector', name: 'Collector', icon: Radio, detail: (d) => d.collector?.last_event ? `Last event ${timeAgo(d.collector.last_event)}` : 'No recent ingested events' },
   { key: 'api', name: 'API', icon: CloudCog, detail: () => `${API_BASE} · API health endpoint` },
   { key: 'database', name: 'Database', icon: Database, detail: (d) => `${fmtNum(d.overview?.totalEvents || 0)} stored events` },
-  { key: 'detection', name: 'Detection engine', icon: ShieldCheck, detail: (d) => `${d.detection?.rules_loaded ?? 0} enabled rules · starter rules only` },
+  { key: 'detection', name: 'Detection engine', icon: ShieldCheck, detail: (d) => `${d.detection?.rules_enabled ?? 0} enabled rules · ${d.detection?.engine || 'engine not reported'}` },
   { key: 'correlation', name: 'Correlation engine', icon: GitMerge, detail: (d) => d.correlation?.message || 'Status reported by the backend' },
   { key: 'ml', name: 'ML engine', icon: BrainCircuit, detail: (d) => d.detection?.ml_warning || (d.detection?.model ? `Model ${d.detection.model} · ${d.detection?.model_version || 'version not reported'}` : 'Model status not reported by the backend') },
 ];
@@ -45,7 +45,7 @@ export default function Architecture() {
         <div><dt>Rules loaded</dt><dd>{detection?.rules_loaded ?? 0}</dd></div>
         <div><dt>Events available</dt><dd>{fmtNum(detection?.events_available ?? 0)}</dd></div>
         <div><dt>Alerts in database</dt><dd>{fmtNum(detection?.alerts_total ?? 0)}</dd></div>
-        <div><dt>ML status</dt><dd>Not integrated</dd></div>
+        <div><dt>ML status</dt><dd>{detection?.ml_status || 'Unknown'}</dd></div>
       </dl><p className="muted">Rule-based detections and ML scoring are reported separately. A loaded model does not establish production accuracy; see Risk & ML for the mapping limitation.</p></Panel>
       <Panel className="col-6" title="Correlation engine"><dl className="kv-list">
         <div><dt>State</dt><dd>{correlation?.status || 'Unknown'}</dd></div>
