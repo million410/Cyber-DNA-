@@ -68,7 +68,8 @@ export function parseReply(data) {
   const hasSections = !!sections && (sections.summary || sections.evidence.length || sections.risk || sections.next_steps.length);
   const reply = str(data.reply);
   if (!reply && !hasSections) throw new AssistantError('empty', 'The service returned an empty answer.');
-  const text = reply || [sections.summary, ...sections.evidence.map((e) => `- ${e.text}`), sections.risk, ...sections.next_steps.map((n) => `- ${n}`)].filter(Boolean).join('\n');
+  const text = reply || [sections.summary, ...sections.evidence.map((e) => `- ${e.text}`), sections.risk, ...sections.next_steps.map((n) => `- ${n}`)].filter(Boolean).join('
+');
   return { text, sections: hasSections ? sections : null, configured: data.configured, providerStatus: data.provider_status || null, model: data.model || null };
 }
 
@@ -76,7 +77,8 @@ export async function askAssistant({ message, history = [], context, options }) 
   const body = {
     message,
     history: history.slice(-MAX_HISTORY).map((m) => ({ role: m.role, content: String(m.content).slice(0, MAX_CONTENT) })),
-    ...(context ? { context } : {}),\n    ...(options ? { options } : {}),
+    ...(context ? { context } : {}),
+    ...(options ? { options } : {}),
   };
   try {
     return parseReply(await apiPost(ASSISTANT_PATH, body, REQUEST_TIMEOUT_MS));
