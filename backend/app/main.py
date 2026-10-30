@@ -17,7 +17,7 @@ from app.api.endpoints import (
     correlation,
     analyst
 )
-from app.api.endpoints import auth, onboarding
+from app.api.endpoints import auth, onboarding, platform
 from app.services.security import require_api_user
 
 # Import models before creating tables.
@@ -131,6 +131,7 @@ app.add_middleware(
 # Authentication and onboarding endpoints are intentionally public at router level only where required.
 app.include_router(auth.router, prefix=settings.API_V1_STR)
 app.include_router(onboarding.router, prefix=settings.API_V1_STR)
+app.include_router(platform.router, prefix=settings.API_V1_STR)
 
 # Protect all existing data/configuration API routers server-side. Health stays public for probes.
 app.include_router(health.router, prefix=settings.API_V1_STR, tags=["health"])

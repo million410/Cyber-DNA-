@@ -1,4 +1,4 @@
-// Advanced AI Analyst behavior. fetch is stubbed with the PROPOSED /assistant/chat contract; this proves frontend behavior only.
+// Advanced AI Analyst behavior. fetch is stubbed with the PROPOSED /analyst/ask contract; this proves frontend behavior only.
 import React from 'react';
 import { render, screen, cleanup, waitFor, within, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -66,7 +66,7 @@ describe('settings', () => {
     expect(screen.getByRole('button', { name: 'Copy DC01' })).toBeTruthy();
     expect(document.querySelector('.as-ai .as-rich').textContent).toBe('j.chen added to a group from 203.0.113.9 on DC01');
     const b = bodies()[0];
-    expect(b.options).toEqual({ responseStyle: 'detailed', audience: 'executive', redacted: true });
+    expect(b.context._response_preferences).toEqual({ responseStyle: 'detailed', audience: 'executive', redacted: true });
     expect(JSON.stringify(b)).not.toMatch(/j\.chen|203\.0\.113\.9|DC01/);
     expect(b.context.selection.user).toBe('USER-1');
     await user.click(screen.getByText(/What was sent/));

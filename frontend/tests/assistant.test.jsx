@@ -1,4 +1,4 @@
-// These tests stub fetch with the PROPOSED /assistant/chat contract (see src/api/assistant.js).
+// These tests stub fetch with the PROPOSED /analyst/ask contract (see src/api/assistant.js).
 // They verify frontend behavior only; they do not prove that a real backend implements the contract.
 import React, { useState } from 'react';
 import { render, screen, waitFor, within, cleanup } from '@testing-library/react';
@@ -50,7 +50,7 @@ test('sends authenticated request with context and shows the real reply; follow-
   await u.type(screen.getByLabelText('Message to AI Analyst'), 'and the host?{Enter}');
   await screen.findByText('Second answer');
   const [url, opts] = global.fetch.mock.calls[0];
-  expect(url).toBe('/api/v1/assistant/chat');
+  expect(url).toBe('/api/v1/analyst/ask');
   expect(opts.method).toBe('POST');
   expect(opts.headers.Authorization).toBe('Bearer tok');
   const [first, second] = bodies();

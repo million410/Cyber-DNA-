@@ -1,4 +1,4 @@
-// Renders the real App shell and pages with stubbed fetch. Alerts/users come from the stub; /assistant/chat uses the PROPOSED contract.
+// Renders the real App shell and pages with stubbed fetch. Alerts/users come from the stub; /analyst/ask uses the PROPOSED contract.
 import React from 'react';
 import { render, screen, cleanup, within, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -13,7 +13,9 @@ beforeEach(() => {
   sessionStorage.setItem('cyberdna-splash', '1'); sessionStorage.setItem('cyberdna-session', '1');
   window.location.hash = '#/alerts';
   global.fetch = vi.fn(async (url, o) => {
-    if (String(url).includes('/assistant/chat')) return json({ reply: 'ok reply' });
+    if (String(url).endsWith('/auth/me')) return json({ id: 1, username: 'test-admin', role: 'platform_admin', organization_id: 1, must_change_password: false });
+    if (String(url).endsWith('/onboarding')) return json({ completed: true });
+    if (String(url).includes('/analyst/ask')) return json({ reply: 'ok reply' });
     if (String(url).endsWith('/alerts')) return json(ALERTS);
     if (String(url).endsWith('/users')) return json(USERS);
     return { ok: false, status: 404, headers: { get: () => 'application/json' }, json: async () => ({}) };
@@ -31,7 +33,7 @@ test('dashboard navigation still works and the assistant receives page + selecte
   await screen.findByText('Alert ALT-1');
   await u.click(screen.getByRole('button', { name: 'Explain this alert in simple terms' }));
   await screen.findByText('ok reply');
-  const call = global.fetch.mock.calls.find(([url]) => String(url).includes('/assistant/chat'));
+  const call = global.fetch.mock.calls.find(([url]) => String(url).includes('/analyst/ask'));
   const body = JSON.parse(call[1].body);
   expect(body.context.page).toBe('Alerts');
   expect(body.context.selection).toMatchObject({ type: 'alert', id: 'ALT-1', eventId: '4625', user: 'a.smith', host: 'WS07', sourceIp: '10.0.0.5', riskScore: 71 });

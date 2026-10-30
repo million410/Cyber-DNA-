@@ -1,4 +1,4 @@
-// Notebook UI against the real Tiptap editor in jsdom. AI calls use a stubbed fetch speaking the PROPOSED /assistant/chat contract.
+// Notebook UI against the real Tiptap editor in jsdom. AI calls use a stubbed fetch speaking the PROPOSED /analyst/ask contract.
 import React from 'react';
 import { render, screen, cleanup, waitFor, within, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

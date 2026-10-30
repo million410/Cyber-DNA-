@@ -1,4 +1,4 @@
-// Click-flexibility layer exercised through the real App shell and pages. fetch is stubbed (alerts/users) and the proposed /assistant/chat.
+// Click-flexibility layer exercised through the real App shell and pages. fetch is stubbed (alerts/users) and the proposed /analyst/ask.
 import React from 'react';
 import { render, screen, cleanup, waitFor, within, fireEvent, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -9,7 +9,7 @@ import { resetAiSettings } from '../src/components/assistant/assistantSettings';
 const json = (b) => ({ ok: true, status: 200, headers: { get: () => 'application/json' }, json: async () => b });
 const ALERTS = [{ id: 'ALT-1', severity: 'high', rule: 'Brute force', score: 71, user: 'a.smith', host: 'WS07', ip: '203.0.113.5', time: '2026-10-01T10:00:00Z', detail: 'Many failed logons from 203.0.113.5', event_id: '4625', explanation: 'x' }];
 const USERS = [{ username: 'a.smith', department: 'Finance', risk_score: 64, what_happened: 'W', what_it_means: 'M', recommendation: 'R' }];
-const chatBodies = () => global.fetch.mock.calls.filter(([u]) => String(u).includes('/assistant/chat')).map(([, o]) => JSON.parse(o.body));
+const chatBodies = () => global.fetch.mock.calls.filter(([u]) => String(u).includes('/analyst/ask')).map(([, o]) => JSON.parse(o.body));
 let user;
 async function boot() {
   user = userEvent.setup();
@@ -36,7 +36,7 @@ beforeEach(() => {
     if (String(url).endsWith('/onboarding')) {
       return json({ completed: true });
     }
-    if (String(url).includes('/assistant/chat')) return json({ reply: 'fine' });
+    if (String(url).includes('/analyst/ask')) return json({ reply: 'fine' });
     if (String(url).endsWith('/alerts')) return json(ALERTS);
     if (String(url).endsWith('/users')) return json(USERS);
     return { ok: false, status: 404, headers: { get: () => 'application/json' }, json: async () => ({}) };
