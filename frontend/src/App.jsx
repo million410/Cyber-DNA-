@@ -18,7 +18,8 @@ import UserBehavior from './pages/UserBehavior';
 import Hosts from './pages/Hosts';
 import Rules from './pages/Rules';
 import RiskML from './pages/RiskML';
-import Architecture from './pages/Architecture';\nimport PlatformAdmin from './pages/PlatformAdmin';
+import Architecture from './pages/Architecture';
+import PlatformAdmin from './pages/PlatformAdmin';
 
 const PAGES = [...NAV.flatMap((g) => g.items.map(([n]) => n)), 'Platform Admin'];
 const slug = (p) => p.toLowerCase().replace(/[^a-z]+/g, '-');
@@ -26,7 +27,8 @@ const fromHash = () => PAGES.find((p) => `#/${slug(p)}` === window.location.hash
 const SESSION = 'cyberdna-session';
 const THEME_CYCLE = ['light', 'dark', 'cyberdna'];
 
-function Shell({ settings, update, onLogout, identity }) {\n  const isPlatformAdmin = identity?.role === 'platform_admin';
+function Shell({ settings, update, onLogout, identity }) {
+  const isPlatformAdmin = identity?.role === 'platform_admin';
   const { alerts, incidents, users, hosts, rules, seen, markSeen, markAlertSeen, live, demoMode, updated, loading, refresh, health, collector } = useData();
   const [page, setPage] = useState(() => fromHash() === 'Platform Admin' && identity?.role !== 'platform_admin' ? 'Overview' : fromHash());
   const [drawer, setDrawer] = useState(false);
@@ -35,14 +37,15 @@ function Shell({ settings, update, onLogout, identity }) {\n  const isPlatformAd
   const scroller = useRef(null);
 
   useEffect(() => {
-    const on = () => setPage(fromHash());
+    const on = () => { const next = fromHash(); setPage(next === 'Platform Admin' && !isPlatformAdmin ? 'Overview' : next); };
     window.addEventListener('hashchange', on);
     return () => window.removeEventListener('hashchange', on);
-  }, []);
+  }, [isPlatformAdmin]);
 
   const go = useCallback((p) => {
+    if (p === 'Platform Admin' && !isPlatformAdmin) return;
     window.location.hash = `/${slug(p)}`;
-  }, []);
+  }, [isPlatformAdmin]);
 
   useEffect(() => {
     scroller.current?.scrollTo({ top: 0 });
@@ -81,7 +84,8 @@ function Shell({ settings, update, onLogout, identity }) {\n  const isPlatformAd
     Hosts: <Hosts {...props} />,
     'Detection Rules': <Rules {...props} />,
     'Risk & ML': <RiskML {...props} />,
-    Architecture: <Architecture />,\n    'Platform Admin': isPlatformAdmin ? <PlatformAdmin /> : <Overview range={settings.range} setRange={(v) => update('range', v)} />,
+    Architecture: <Architecture />,
+    'Platform Admin': isPlatformAdmin ? <PlatformAdmin /> : <Overview range={settings.range} setRange={(v) => update('range', v)} />,
   }[page];
 
   return (
@@ -95,6 +99,7 @@ function Shell({ settings, update, onLogout, identity }) {\n  const isPlatformAd
         openSettings={() => setDialog('settings')}
         alertCount={newAlerts}
         status={status}
+        isPlatformAdmin={isPlatformAdmin}
       />
       {drawer && <button type="button" className="shade" aria-label="Close menu" onClick={() => setDrawer(false)} />}
       <div className="main">
@@ -149,7 +154,8 @@ export default function App() {
     try { return sessionStorage.getItem(SESSION) === '1'; } catch { return false; }
   });
   const [notice, setNotice] = useState('');
-  const [mustChangePassword, setMustChangePassword] = useState(false);\n  const [identity, setIdentity] = useState(null);
+  const [mustChangePassword, setMustChangePassword] = useState(false);
+  const [identity, setIdentity] = useState(null);
   const [onboardingComplete, setOnboardingComplete] = useState(null);
 
   useEffect(() => {
@@ -159,7 +165,9 @@ export default function App() {
       .then((r) => { if (!r.ok) throw new Error('Session expired'); return r.json(); })
       .then(async (identity) => {
         if (cancelled) return;
-        setIdentity(identity);\n        setMustChangePassword(Boolean(identity.must_change_password));
+        setIdentity(identity);
+        setIdentity(identity);
+        setMustChangePassword(Boolean(identity.must_change_password));
         if (!identity.must_change_password) {
           const onboardingResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/onboarding`, { credentials: 'same-origin', headers: { Accept: 'application/json' } });
           if (!onboardingResponse.ok) throw new Error('Unable to load onboarding status');
@@ -179,6 +187,7 @@ export default function App() {
 
   const login = (identity) => {
     try { sessionStorage.setItem(SESSION, '1'); } catch { /* ignore */ }
+    setIdentity(identity || null);
     setLogged(true);
     setMustChangePassword(Boolean(identity?.must_change_password));
     setOnboardingComplete(identity?.must_change_password ? null : null);
@@ -188,6 +197,7 @@ export default function App() {
     fetch(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/auth/logout`, { method: 'POST', credentials: 'same-origin' }).catch(() => {});
     try { sessionStorage.removeItem(SESSION); } catch { /* ignore */ }
     setLogged(false);
+    setIdentity(null);
     setMustChangePassword(false);
     setOnboardingComplete(null);
     setNotice(msg);
