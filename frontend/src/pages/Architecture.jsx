@@ -11,7 +11,7 @@ const SERVICE_DEFS = [
   { key: 'database', name: 'Database', icon: Database, detail: (d) => `${fmtNum(d.overview?.totalEvents || 0)} stored events` },
   { key: 'detection', name: 'Detection engine', icon: ShieldCheck, detail: (d) => `${d.detection?.rules_loaded ?? 0} enabled rules · starter rules only` },
   { key: 'correlation', name: 'Correlation engine', icon: GitMerge, detail: (d) => d.correlation?.message || 'Status reported by the backend' },
-  { key: 'ml', name: 'ML engine', icon: BrainCircuit, detail: (d) => d.detection?.ml_warning || (d.detection?.ml_model ? `Model ${d.detection.ml_model} · ${d.detection?.model_version || 'version not reported'}` : 'Model status not reported by the backend') },
+  { key: 'ml', name: 'ML engine', icon: BrainCircuit, detail: (d) => d.detection?.ml_warning || (d.detection?.model ? `Model ${d.detection.model} · ${d.detection?.model_version || 'version not reported'}` : 'Model status not reported by the backend') },
 ];
 const labelFor = (key, data) => {
   if (key === 'ml') return data.detection?.ml_status === 'available' ? 'Available' : data.detection?.ml_status === 'disabled' ? 'Disabled' : data.detection?.ml_status || 'Unknown';
