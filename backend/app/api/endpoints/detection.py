@@ -31,6 +31,8 @@ def get_detection_status(db: Session = Depends(get_db)):
         "ml_compatibility": ml["compatibility"],
         "ml_warning": ml["warning"],
         "ml_features": ml["feature_names"],
+        "ml_threshold_p99": ml["threshold_p99"],
+        "ml_threshold_p995": ml["threshold_p995"],
         "ml_feature_transform": ml["feature_transform"],
         "ml_score_semantics": ml["score_semantics"],
     }
