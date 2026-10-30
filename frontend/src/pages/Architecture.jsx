@@ -10,12 +10,12 @@ const SERVICE_DEFS = [
   { key: 'api', name: 'API', icon: CloudCog, detail: () => `${API_BASE} · API health endpoint` },
   { key: 'database', name: 'Database', icon: Database, detail: (d) => `${fmtNum(d.overview?.totalEvents || 0)} stored events` },
   { key: 'detection', name: 'Detection engine', icon: ShieldCheck, detail: (d) => `${d.detection?.rules_loaded ?? 0} enabled rules · starter rules only` },
-  { key: 'correlation', name: 'Correlation engine', icon: GitMerge, detail: () => 'Not implemented' },
-  { key: 'ml', name: 'ML engine', icon: BrainCircuit, detail: () => 'Not integrated — no trained model connected' },
+  { key: 'correlation', name: 'Correlation engine', icon: GitMerge, detail: (d) => d.correlation?.message || 'Status reported by the backend' },
+  { key: 'ml', name: 'ML engine', icon: BrainCircuit, detail: (d) => d.detection?.ml_warning || (d.detection?.ml_model ? `Model ${d.detection.ml_model} · ${d.detection?.model_version || 'version not reported'}` : 'Model status not reported by the backend') },
 ];
 const labelFor = (key, data) => {
-  if (key === 'ml') return 'Not integrated';
-  if (key === 'correlation') return data.correlation?.status === 'not_integrated' ? 'Not integrated' : (data.correlation?.status || 'Unknown');
+  if (key === 'ml') return data.detection?.ml_status === 'available' ? 'Available' : data.detection?.ml_status === 'disabled' ? 'Disabled' : data.detection?.ml_status || 'Unknown';
+  if (key === 'correlation') return data.correlation?.status || 'Unknown';
   if (key === 'detection') return data.detection?.status === 'available' ? 'Available' : (data.detection?.status || 'Unknown');
   if (key === 'collector') return data.collector?.status || 'Unknown';
   if (key === 'database') return data.health?.database || 'Unknown';
@@ -46,13 +46,13 @@ export default function Architecture() {
         <div><dt>Events available</dt><dd>{fmtNum(detection?.events_available ?? 0)}</dd></div>
         <div><dt>Alerts in database</dt><dd>{fmtNum(detection?.alerts_total ?? 0)}</dd></div>
         <div><dt>ML status</dt><dd>Not integrated</dd></div>
-      </dl><p className="muted">Starter rules currently check repeated failed logons and audit-log clearing. This is not ML-based detection.</p></Panel>
+      </dl><p className="muted">Rule-based detections and ML scoring are reported separately. A loaded model does not establish production accuracy; see Risk & ML for the mapping limitation.</p></Panel>
       <Panel className="col-6" title="Correlation engine"><dl className="kv-list">
         <div><dt>State</dt><dd>{correlation?.status || 'Unknown'}</dd></div>
         <div><dt>Details</dt><dd>{correlation?.message || 'No correlation service connected'}</dd></div>
         <div><dt>Open cases</dt><dd>{overview?.open_incidents ?? 0}</dd></div>
         <div><dt>Last run</dt><dd>Not available</dd></div>
-      </dl><p className="muted">Incident correlation is not implemented yet. The API will not claim that incidents were created.</p></Panel>
+      </dl><p className="muted">Correlation status and incident counts are taken from the backend. Review the linked evidence before treating an incident as confirmed.</p></Panel>
       <Panel className="col-12" title="API endpoint checks" subtitle="A reachable endpoint does not prove every feature is implemented.">
         <div className="table-wrap"><table><thead><tr><th>Resource</th><th>Path</th><th>Check</th></tr></thead><tbody>{rows.map((r) => <tr key={r.key}><td>{r.key}</td><td className="mono">{r.path}</td><td><span className={`badge ${r.src === 'live' ? 'sev-ok' : 'sev-info'}`}><i />{r.src === 'live' ? 'Responded' : r.src === 'demo' ? 'Demo data' : 'Not confirmed'}</span></td></tr>)}</tbody></table></div>
       </Panel>
