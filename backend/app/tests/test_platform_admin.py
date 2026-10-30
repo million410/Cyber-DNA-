@@ -89,11 +89,6 @@ def test_platform_admin_can_list_all_tenants_and_usage():
 def test_platform_admin_can_disable_user_and_revoke_sessions():
     app, engine, _, _, target_id = make_app()
     try:
-        with app.state if hasattr(app, "state") else TestClient(app) as client:
-            pass
-    except Exception:
-        pass
-    try:
         with TestClient(app) as client:
             # Seed an active session through the same isolated database.
             from app.db.database import SessionLocal
