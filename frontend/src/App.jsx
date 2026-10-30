@@ -18,17 +18,17 @@ import UserBehavior from './pages/UserBehavior';
 import Hosts from './pages/Hosts';
 import Rules from './pages/Rules';
 import RiskML from './pages/RiskML';
-import Architecture from './pages/Architecture';
+import Architecture from './pages/Architecture';\nimport PlatformAdmin from './pages/PlatformAdmin';
 
-const PAGES = NAV.flatMap((g) => g.items.map(([n]) => n));
+const PAGES = [...NAV.flatMap((g) => g.items.map(([n]) => n)), 'Platform Admin'];
 const slug = (p) => p.toLowerCase().replace(/[^a-z]+/g, '-');
 const fromHash = () => PAGES.find((p) => `#/${slug(p)}` === window.location.hash) || 'Overview';
 const SESSION = 'cyberdna-session';
 const THEME_CYCLE = ['light', 'dark', 'cyberdna'];
 
-function Shell({ settings, update, onLogout }) {
+function Shell({ settings, update, onLogout, identity }) {\n  const isPlatformAdmin = identity?.role === 'platform_admin';
   const { alerts, incidents, users, hosts, rules, seen, markSeen, markAlertSeen, live, demoMode, updated, loading, refresh, health, collector } = useData();
-  const [page, setPage] = useState(fromHash);
+  const [page, setPage] = useState(() => fromHash() === 'Platform Admin' && identity?.role !== 'platform_admin' ? 'Overview' : fromHash());
   const [drawer, setDrawer] = useState(false);
   const [dialog, setDialog] = useState(null); // settings | pin | profile
   const [query, setQuery] = useState('');
@@ -81,7 +81,7 @@ function Shell({ settings, update, onLogout }) {
     Hosts: <Hosts {...props} />,
     'Detection Rules': <Rules {...props} />,
     'Risk & ML': <RiskML {...props} />,
-    Architecture: <Architecture />,
+    Architecture: <Architecture />,\n    'Platform Admin': isPlatformAdmin ? <PlatformAdmin /> : <Overview range={settings.range} setRange={(v) => update('range', v)} />,
   }[page];
 
   return (
@@ -149,7 +149,7 @@ export default function App() {
     try { return sessionStorage.getItem(SESSION) === '1'; } catch { return false; }
   });
   const [notice, setNotice] = useState('');
-  const [mustChangePassword, setMustChangePassword] = useState(false);
+  const [mustChangePassword, setMustChangePassword] = useState(false);\n  const [identity, setIdentity] = useState(null);
   const [onboardingComplete, setOnboardingComplete] = useState(null);
 
   useEffect(() => {
@@ -159,7 +159,7 @@ export default function App() {
       .then((r) => { if (!r.ok) throw new Error('Session expired'); return r.json(); })
       .then(async (identity) => {
         if (cancelled) return;
-        setMustChangePassword(Boolean(identity.must_change_password));
+        setIdentity(identity);\n        setMustChangePassword(Boolean(identity.must_change_password));
         if (!identity.must_change_password) {
           const onboardingResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/onboarding`, { credentials: 'same-origin', headers: { Accept: 'application/json' } });
           if (!onboardingResponse.ok) throw new Error('Unable to load onboarding status');
@@ -167,7 +167,7 @@ export default function App() {
           if (!cancelled) setOnboardingComplete(Boolean(onboarding.completed));
         }
       })
-      .catch(() => { if (!cancelled) { try { sessionStorage.removeItem(SESSION); } catch { /* ignore */ } setLogged(false); setOnboardingComplete(null); setNotice('Your session expired or setup status could not be loaded. Please sign in again.'); } });
+      .catch(() => { if (!cancelled) { try { sessionStorage.removeItem(SESSION); } catch { /* ignore */ } setLogged(false); setIdentity(null); setOnboardingComplete(null); setNotice('Your session expired or setup status could not be loaded. Please sign in again.'); } });
     return () => { cancelled = true; };
   }, [logged]);
 
@@ -227,7 +227,7 @@ export default function App() {
 
   return (
     <DataProvider range={settings.range} autoRefresh={settings.refresh}>
-      <Shell settings={settings} update={update} onLogout={logout} />
+      <Shell settings={settings} update={update} onLogout={logout} identity={identity} />
     </DataProvider>
   );
 }
