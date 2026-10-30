@@ -13,7 +13,8 @@ const StatusRow = ({ icon: Icon, name, state }) => (
   <div className="side-status"><Icon size={15} aria-hidden="true" /><span>{name}</span><span className="state"><span className={`dot ${STATES[state][0]}`} />{STATES[state][1]}</span></div>
 );
 
-export default function Sidebar({ page, go, open, close, openSettings, alertCount, status, isPlatformAdmin = false }) {\n  const groups = isPlatformAdmin ? [...NAV, { group: 'Administration', items: [['Platform Admin', Building2]] }] : NAV;
+export default function Sidebar({ page, go, open, close, openSettings, alertCount, status, isPlatformAdmin = false }) {
+  const groups = isPlatformAdmin ? [...NAV, { group: 'Administration', items: [['Platform Admin', Building2]] }] : NAV;
   return (
     <aside className={`sidebar ${open ? 'open' : ''}`} id="sidebar" aria-label="Primary">
       <div className="brand-row">
