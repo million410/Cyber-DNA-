@@ -29,7 +29,7 @@ This register describes capabilities visible in the repository and the work stil
 - Real Windows AD collector installation, secure transport, service-account permissions, reconnect behavior, and end-to-end field mapping require customer-lab testing.
 - Tenant-isolation tests need to cover every API route, relationship traversal, AI context retrieval, exports, collector paths, and admin operations. Existing tests are a useful start, not a complete security certification.
 - Login throttling, MFA, password recovery, session anomaly monitoring, backup/restore drills, retention/deletion policies, and production incident response need completion.
-- Frontend automated tests and a full browser acceptance suite have not been run in the current execution environment.
+- The first frontend CI run exposed stale test assumptions about the old `/assistant/chat` route and a JavaScript syntax issue introduced during the change. The route expectations and syntax were corrected; the latest frontend test run has not yet been confirmed green.
 
 ## Current change set
 
@@ -39,7 +39,7 @@ PR: https://github.com/million410/Cyber-DNA-/pull/5
 - Adds platform user access disable/enable. Disabling an account revokes its active sessions.
 - Adds an admin-only frontend area. It is rendered only for a server-authenticated `platform_admin`.
 - Does not change existing API paths or request/response contracts.
-- Vercel preview build for the branch reached READY. Automated backend tests and browser acceptance tests still need to be run; READY is a build result, not a release approval.
+- Backend tests and Python compilation passed in GitHub Actions. The first frontend CI run failed; the parser syntax issue was fixed and a subsequent Vercel preview build reached READY. The newest commits are still awaiting a fresh complete frontend CI result. READY is a build result, not a release approval.
 
 ## Release gates
 
