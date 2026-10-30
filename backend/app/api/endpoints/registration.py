@@ -92,13 +92,14 @@ def register_company(body: RegistrationBody, db: Session = Depends(get_db)):
         action="public_company_registration_requested",
         details={"email": email},
     ))
-    db.commit()
     try:
         _send_verification_email(email, raw_token)
-    except HTTPException:
-        db.delete(user)
-        db.delete(org)
         db.commit()
+    except HTTPException:
+        db.rollback()
+        raise
+    except Exception:
+        db.rollback()
         raise
     return {"accepted": True, "message": "Check your email for a verification link."}
 
