@@ -181,6 +181,7 @@ class AnalystRequest(BaseModel):
     message: str = Field(min_length=1, max_length=4000)
     history: List[Dict[str, str]] = []
     context: Optional[Dict[str, Any]] = None
+    options: Optional[Dict[str, Any]] = None
 
 class AnalystResponse(BaseModel):
     configured: bool
