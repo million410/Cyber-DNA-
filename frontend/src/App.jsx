@@ -166,7 +166,6 @@ export default function App() {
       .then(async (identity) => {
         if (cancelled) return;
         setIdentity(identity);
-        setIdentity(identity);
         setMustChangePassword(Boolean(identity.must_change_password));
         if (!identity.must_change_password) {
           const onboardingResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL || '/api/v1'}/onboarding`, { credentials: 'same-origin', headers: { Accept: 'application/json' } });
