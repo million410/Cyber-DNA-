@@ -129,7 +129,8 @@ app.add_middleware(
 )
 
 # Authentication and onboarding endpoints are intentionally public at router level only where required.
-app.include_router(auth.router, prefix=settings.API_V1_STR)\napp.include_router(registration.router, prefix=settings.API_V1_STR)
+app.include_router(auth.router, prefix=settings.API_V1_STR)
+app.include_router(registration.router, prefix=settings.API_V1_STR)
 app.include_router(onboarding.router, prefix=settings.API_V1_STR)
 app.include_router(platform.router, prefix=settings.API_V1_STR)
 
